@@ -37,12 +37,13 @@ dotenv.config({ path: resolve(__dirname, dotenvConfigPath) });
 
 // Ensure that we have all the environment variables we need.
 const mnemonic: string | undefined = process.env.MNEMONIC;
-if (!mnemonic) {
+const privkey: string | undefined = process.env.PRIVATE_KEY_DEPLOYER;
+if (!mnemonic && !privkey) {
   throw new Error("Please set your MNEMONIC in a .env file");
 }
 
 const chainIds = {
-  zama: 8009,
+  zama: 9000,
   local: 9000,
   localNetwork1: 9000,
   multipleValidatorTestnet: 8009,
@@ -65,11 +66,12 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
       break;
   }
   return {
-    accounts: {
-      count: 10,
-      mnemonic,
-      path: "m/44'/60'/0'/0",
-    },
+    // accounts: {
+    //   count: 10,
+    //   mnemonic,
+    //   path: "m/44'/60'/0'/0",
+    // },
+    accounts: [privkey as string],
     chainId: chainIds[chain],
     url: jsonRpcUrl,
   };
