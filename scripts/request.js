@@ -1,7 +1,7 @@
 const balanceData = JSON.stringify({
   jsonrpc: "2.0",
   method: "eth_getBalance",
-  params: ["0x9C3Ad2B5f00EC8e8564244EBa59692Dd5e57695b", "latest"],
+  params: ["0x1E14278310Ad0305cED5BDea7BC9F0Df7bF5c3a2", "latest"],
   id: 1,
 });
 
