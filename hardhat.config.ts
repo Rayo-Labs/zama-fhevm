@@ -66,12 +66,12 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
       break;
   }
   return {
-    // accounts: {
-    //   count: 10,
-    //   mnemonic,
-    //   path: "m/44'/60'/0'/0",
-    // },
-    accounts: [privkey as string],
+    accounts: {
+      count: 10,
+      mnemonic,
+      path: "m/44'/60'/0'/0",
+    },
+    //accounts: [privkey as string],
     chainId: chainIds[chain],
     url: jsonRpcUrl,
   };
