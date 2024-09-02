@@ -99,7 +99,8 @@
     "fhevm:faucet:bob": "docker exec -i zama-dev-fhevm-validator-1 faucet $(npx hardhat task:getEthereumAddressBob)",
     "fhevm:faucet:carol": "docker exec -i zama-dev-fhevm-validator-1 faucet $(npx hardhat task:getEthereumAddressCarol)",
     "fhevm:faucet:dave": "docker exec -i zama-dev-fhevm-validator-1 faucet $(npx hardhat task:getEthereumAddressDave)",
-    "fhevm:faucet:eve": "docker exec -i zama-dev-fhevm-validator-1 faucet $(npx hardhat task:getEthereumAddressEve)"
+    "fhevm:faucet:eve": "docker exec -i zama-dev-fhevm-validator-1 faucet $(npx hardhat task:getEthereumAddressEve)",
+    "callContract": "TS_NODE_TRANSPILE_ONLY=true ts-node ./test/contract_call.ts"
   },
   "dependencies": {
     "@fhenixprotocol/contracts": "^0.2.1",

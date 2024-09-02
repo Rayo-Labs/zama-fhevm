@@ -1,4 +1,4 @@
-//import { createInstance } from "fhevmjs";
+import { createInstance as createFhevmInstance } from "fhevmjs";
 import { ethers } from "hardhat";
 
 import { abi } from "./abi";
@@ -26,19 +26,31 @@ async function main() {
   //await callContract(contractAddress, abi, "decimals");
   //await callContract(contractAddress, abi, "balanceOf", ["0x1E14278310Ad0305cED5BDea7BC9F0Df7bF5c3a2"]);
   //await callContract(contractAddress, abi, "deposit", [], "0.01");
-  await callContract(contractAddress, abi, "balanceOf", ["0x9C3Ad2B5f00EC8e8564244EBa59692Dd5e57695b"]);
+  //await callContract(contractAddress, abi, "balanceOf", ["0x9C3Ad2B5f00EC8e8564244EBa59692Dd5e57695b"]);
+  //await callContract(contractAddress, abi, "totalSupply");
   ////////////////////////////////////////////////////
-  // const instance = await createInstance({
-  //   networkUrl: "https://devnet.zama.ai",
-  //   gatewayUrl: "https://gateway.devnet.zama.ai",
-  // });
-  // const inputAmount = instance.createEncryptedInput(contractAddress, "0x9C3Ad2B5f00EC8e8564244EBa59692Dd5e57695b");
-  // inputAmount.add64(BigInt(0.005 * 10 ** 6));
-  // const encryptedWithdrawAmount = inputAmount.encrypt();
-  // const inputTo = instance.createEncryptedInput(contractAddress, "0x9C3Ad2B5f00EC8e8564244EBa59692Dd5e57695b");
-  // inputTo.addAddress("0x9C3Ad2B5f00EC8e8564244EBa59692Dd5e57695b");
-  // const encryptedTo = inputTo.encrypt();
-  // await callContract(contractAddress, abi, "withdraw", [encryptedWithdrawAmount, encryptedTo], "0");
+  const instance = await createFhevmInstance({
+    networkUrl: "https://devnet.zama.ai",
+    gatewayUrl: "https://gateway.devnet.zama.ai",
+  });
+  const inputAmount = instance.createEncryptedInput(contractAddress, "0x9C3Ad2B5f00EC8e8564244EBa59692Dd5e57695b");
+  inputAmount.add64(BigInt(0.002 * 10 ** 6));
+  const encryptedWithdrawAmount = inputAmount.encrypt();
+  const inputTo = instance.createEncryptedInput(contractAddress, "0x9C3Ad2B5f00EC8e8564244EBa59692Dd5e57695b");
+  inputTo.addAddress("0x9C3Ad2B5f00EC8e8564244EBa59692Dd5e57695b");
+  const encryptedTo = inputTo.encrypt();
+  await callContract(
+    contractAddress,
+    abi,
+    "withdrawal",
+    [
+      encryptedWithdrawAmount.handles[0],
+      encryptedWithdrawAmount.inputProof,
+      encryptedTo.handles[0],
+      encryptedTo.inputProof,
+    ],
+    "0",
+  );
 }
 
 main()
