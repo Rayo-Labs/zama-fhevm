@@ -14,6 +14,9 @@ importers:
       extra-bigint:
         specifier: ^1.1.18
         version: 1.1.18
+      fhenixjs:
+        specifier: 0.4.0-alpha.0
+        version: 0.4.0-alpha.0
       sqlite3:
         specifier: ^5.1.7
         version: 5.1.7
@@ -724,6 +727,9 @@ packages:
 
   '@types/node@18.19.44':
     resolution: {integrity: sha512-ZsbGerYg72WMXUIE9fYxtvfzLEuq6q8mKERdWFnqTmOvudMxnz+CBNRoOwJ2kNpFOncrKjT1hZwxjlFgQ9qvQA==}
+
+  '@types/node@20.16.5':
+    resolution: {integrity: sha512-VwYCweNo3ERajwy0IUlqqcyZ8/A7Zwa9ZP3MnENWcB11AejO+tLy3pu850goUW2FC/IJMdZUfKpX/yxL1gymCA==}
 
   '@types/node@8.10.66':
     resolution: {integrity: sha512-tktOkFUA4kXx2hhhrB8bIFb5TbwzS4uOhKEmwiD+NoiL0qtP2OQ9mFldbgD4dV1djrlBYP6eBuQZiWjuHUpqFw==}
@@ -1473,6 +1479,11 @@ packages:
 
   fastq@1.17.1:
     resolution: {integrity: sha512-sRVD3lWVIXWg6By68ZN7vho9a1pQcN/WBFaAAsDDFzlJjvoGx0P8z7V1t72grFJfJhu3YPZBuu25f7Kaw2jN1w==}
+
+  fhenixjs@0.4.0-alpha.0:
+    resolution: {integrity: sha512-wY4tAffjLEk6q01XNb4nWMtng0tj9cb18rThK440I0vGAl6qEtPZztET6E9Mib6h1IetQlqQr5jky5DS6hIxxw==}
+    engines: {node: '>=20.0.0'}
+    deprecated: deprecated
 
   fhevm@0.5.8:
     resolution: {integrity: sha512-fzTQnnw/7EajQywXUfZyTEGlsPe2SmvcVLklsmHEeZ5YQRmbp9pGR2rFuRcXED+Ou76Miq9oExRKIhkcdPlySg==}
@@ -2983,6 +2994,9 @@ packages:
   undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
 
+  undici-types@6.19.8:
+    resolution: {integrity: sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==}
+
   undici@5.28.4:
     resolution: {integrity: sha512-72RFADWFqKmUb2hmmvNODKL3p9hcB6Gt2DOQMis1SEBaV6a4MH8soBvzg+95CYhCKPFedut2JY9bMfrDl9D23g==}
     engines: {node: '>=14.0'}
@@ -3959,6 +3973,10 @@ snapshots:
     dependencies:
       undici-types: 5.26.5
 
+  '@types/node@20.16.5':
+    dependencies:
+      undici-types: 6.19.8
+
   '@types/node@8.10.66': {}
 
   '@types/pbkdf2@3.1.2':
@@ -4870,6 +4888,12 @@ snapshots:
   fastq@1.17.1:
     dependencies:
       reusify: 1.0.4
+
+  fhenixjs@0.4.0-alpha.0:
+    dependencies:
+      '@types/node': 20.16.5
+      tweetnacl: 1.0.3
+      tweetnacl-util: 0.15.1
 
   fhevm@0.5.8:
     dependencies:
@@ -6582,6 +6606,8 @@ snapshots:
     optional: true
 
   undici-types@5.26.5: {}
+
+  undici-types@6.19.8: {}
 
   undici@5.28.4:
     dependencies:

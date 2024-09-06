@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: BSD-3-Clause-Clear
-
 pragma solidity ^0.8.24;
 
 import "fhevm/lib/TFHE.sol";
@@ -44,7 +43,8 @@ contract WrappedEncryptedERC20 is Ownable2Step, GatewayCaller {
         return _totalSupply;
     }
 
-    function deposit() public payable {
+    // Mints an encrypted amount of tokens to the `to` address.
+    function deposit() public payable virtual {
         uint256 amount = msg.value;
         uint64 convertedAmount = _convertDecimalForDeposit(amount);
         balances[msg.sender] = TFHE.add(balances[msg.sender], TFHE.asEuint64(convertedAmount));
@@ -53,12 +53,13 @@ contract WrappedEncryptedERC20 is Ownable2Step, GatewayCaller {
         _totalSupply = _totalSupply + convertedAmount;
     }
 
+    // Withdraws an encrypted amount of tokens to the `to` address.
     function withdrawal(
         einput encryptedAmount,
         bytes calldata encryptedAmountProof,
         einput encryptedTo,
         bytes calldata encryptedToProof
-    ) public {
+    ) public virtual {
         euint64 amount = TFHE.asEuint64(encryptedAmount, encryptedAmountProof);
         eaddress to = TFHE.asEaddress(encryptedTo, encryptedToProof);
         ebool canWithdraw = TFHE.le(amount, balances[msg.sender]);
@@ -70,6 +71,7 @@ contract WrappedEncryptedERC20 is Ownable2Step, GatewayCaller {
         Gateway.requestDecryption(cts, this.callbackWithdrawal.selector, 0, block.timestamp + 100, false);
     }
 
+    // Callback function for withdrawal.
     function callbackWithdrawal(uint256, uint64 amount, address to) public onlyGateway returns (bool) {
         _totalSupply = _totalSupply - amount;
         euint64 eAmount = TFHE.asEuint64(amount);
@@ -183,10 +185,12 @@ contract WrappedEncryptedERC20 is Ownable2Step, GatewayCaller {
         emit Transfer(from, to);
     }
 
+    // Converts the amount for deposit.
     function _convertDecimalForDeposit(uint256 amount) internal pure returns (uint64) {
         return uint64(amount / 10 ** (18 - decimals));
     }
 
+    // Converts the amount for withdrawal.
     function _convertDecimalForWithdraw(uint64 amount) internal pure returns (uint256) {
         return uint256(amount) * 10 ** (18 - decimals);
     }
