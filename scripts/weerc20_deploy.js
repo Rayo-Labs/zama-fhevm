@@ -5,8 +5,8 @@ async function main() {
 
   console.log("Deploying contracts with the account:", deployer.address);
 
-  const WrappedEncryptedERC20 = await hre.ethers.getContractFactory("WrappedEncryptedERC20");
-  const weerc20 = await WrappedEncryptedERC20.deploy("Wrapped Encrypted ERC20", "WEERC20");
+  const WrappedEncryptedERC20 = await hre.ethers.getContractFactory("ZamaWEERC20");
+  const weerc20 = await WrappedEncryptedERC20.deploy("Zama Wrapped Ether", "ZWE");
 
   console.log("Contract deployed at:", weerc20.target);
 }
