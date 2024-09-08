@@ -1,29 +1,43 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
+import { createInstance as createFhevmInstance } from "fhevmjs";
 import hre from "hardhat";
 
 import { abi } from "./abi";
 
 const { ethers } = hre;
 
-const contractAddress = "0x92E743aD0C7594231753C5695e5081412188614c"; // 0x8d55cD2853081F80f9f8c6FEE4e949590240c005 // 0x02af3256c398131bDe388310b305c8Cf6E7f8844
+const contractAddress = "0xe8a12B124580e653633Cf49c780903101458C183"; // 0x8d55cD2853081F80f9f8c6FEE4e949590240c005 // 0x02af3256c398131bDe388310b305c8Cf6E7f8844
 
 async function ContractCall(ca: string, cabi: any, cfunc: string, cargs: any[] = [], cvalue: string = "0") {
   const args = cargs;
   const privateKey = process.env.PRIVATE_KEY_DEPLOYER as string;
   const wallet = new ethers.Wallet(privateKey, new ethers.JsonRpcProvider("https://devnet.zama.ai"));
+  const instance = await createFhevmInstance({
+    networkUrl: "https://devnet.zama.ai",
+    gatewayUrl: "https://gateway.devnet.zama.ai",
+  });
   //const client = new FhenixClient({ provider: hre.ethers.provider });
 
-  // if (cfunc === "unwrap") {
-  //   const encryptedUint64 = await client.encrypt_uint64(args[0]);
-  //   args[0] = encryptedUint64;
-  // } else if (cfunc === "transferEncrypted") {
-  //   //args[1] = await fhenixjs.encrypt_uint64(cargs[1]);
-  // } else if (cfunc === "getBalanceEncrypted") {
-  //   const permit = await getPermit(contractAddress, hre.ethers.provider);
-  //   const permission = client.extractPermitPermission(permit!);
-  //   console.log(permission);
-  //   args[0] = permission;
-  // }
+  if (cfunc === "unwrap") {
+    // const encryptedUint64 = await client.encrypt_uint64(args[0]);
+    const input = instance.createEncryptedInput(ca, wallet.address);
+    input.add64(args[0]);
+    const encryptedInput = input.encrypt();
+    args[0] = encryptedInput.handles[0];
+    args[1] = encryptedInput.inputProof;
+  } else if (cfunc === "transferEncrypted") {
+    //args[1] = await fhenixjs.encrypt_uint64(cargs[1]);
+    const input = instance.createEncryptedInput(ca, wallet.address);
+    input.add64(args[1]);
+    const encryptedInput = input.encrypt();
+    args[1] = encryptedInput.handles[0];
+    args[2] = encryptedInput.inputProof;
+  } else if (cfunc === "getBalanceEncrypted") {
+    // const permit = await getPermit(contractAddress, hre.ethers.provider);
+    // const permission = client.extractPermitPermission(permit!);
+    // console.log(permission);
+    // args[0] = permission;
+  }
   const contract = new ethers.Contract(ca, cabi, wallet);
   const result = await contract[cfunc](...args, {
     value: BigInt(Number(cvalue) * 10 ** 18),

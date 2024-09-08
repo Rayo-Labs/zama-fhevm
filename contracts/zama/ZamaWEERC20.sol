@@ -43,13 +43,19 @@ contract ZamaWEERC20 is ERC20, GatewayCaller {
         uint256[] memory cts = new uint256[](2);
         cts[0] = Gateway.toUint256(to);
         cts[1] = Gateway.toUint256(canUnwrapAmount);
-        Gateway.requestDecryption(cts, this.callbackUnwrap.selector, 0, block.timestamp + 100, false);
+        Gateway.requestDecryption(cts, this.callbackUnwrap.selector, 0, block.timestamp + 10000, false);
     }
 
     function callbackUnwrap(uint256, address to, uint64 amount) public onlyGateway returns (bool) {
         euint64 encAmount = TFHE.asEuint64(amount);
 
-        _encBalances[to] = TFHE.sub(_encBalances[msg.sender], encAmount);
+        ebool canUnwrap = TFHE.le(encAmount, _encBalances[to]);
+        euint64 canUnwrapAmount = TFHE.select(canUnwrap, encAmount, TFHE.asEuint64(0));
+
+        _encBalances[to] = TFHE.sub(_encBalances[to], canUnwrapAmount);
+        TFHE.allow(_encBalances[to], address(this));
+        TFHE.allow(_encBalances[to], to);
+        TFHE.allow(_encBalances[to], gateway);
         _mint(to, _convertDecimalForUnwrap(amount));
 
         return true;
@@ -63,6 +69,13 @@ contract ZamaWEERC20 is ERC20, GatewayCaller {
 
         _encBalances[to] = TFHE.add(_encBalances[to], canTransferAmount);
         _encBalances[msg.sender] = TFHE.sub(_encBalances[msg.sender], canTransferAmount);
+        TFHE.allow(_encBalances[to], address(this));
+        TFHE.allow(_encBalances[to], to);
+        TFHE.allow(_encBalances[to], gateway);
+
+        TFHE.allow(_encBalances[msg.sender], address(this));
+        TFHE.allow(_encBalances[msg.sender], msg.sender);
+        TFHE.allow(_encBalances[msg.sender], gateway);
     }
 
     // Converts the amount for deposit.
