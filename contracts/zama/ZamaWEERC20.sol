@@ -10,6 +10,7 @@ contract ZamaWEERC20 is ERC20, GatewayCaller {
     address public constant gateway = 0xc8c9303Cd7F337fab769686B593B87DC3403E0ce;
 
     mapping(address => euint64) internal _encBalances;
+    mapping(address => mapping(address => euint64)) internal _allowances;
 
     constructor(string memory name, string memory symbol) ERC20(name, symbol) {
         _mint(msg.sender, 100 * 10 ** uint(decimals()));
@@ -17,6 +18,10 @@ contract ZamaWEERC20 is ERC20, GatewayCaller {
 
     function getEncryptedBalance(address account) public view returns (euint64) {
         return _encBalances[account];
+    }
+
+    function getAllowance(address owner, address spender) public view returns (euint64) {
+        return _allowances[owner][spender];
     }
 
     function wrap(uint256 amount) public {
@@ -61,21 +66,63 @@ contract ZamaWEERC20 is ERC20, GatewayCaller {
         return true;
     }
 
+    function approve(address spender, einput encryptedAmount, bytes calldata inputProof) public returns (bool) {
+        euint64 amount = TFHE.asEuint64(encryptedAmount, inputProof);
+
+        _allowances[msg.sender][spender] = amount;
+        TFHE.allow(_allowances[msg.sender][spender], address(this));
+        TFHE.allow(_allowances[msg.sender][spender], msg.sender);
+        TFHE.allow(_allowances[msg.sender][spender], spender);
+
+        return true;
+    }
+
     function transferEncrypted(address to, einput encryptedAmount, bytes calldata inputProof) public {
         euint64 amount = TFHE.asEuint64(encryptedAmount, inputProof);
+        require(TFHE.isSenderAllowed(amount));
 
         ebool canTransfer = TFHE.le(amount, _encBalances[msg.sender]);
         euint64 canTransferAmount = TFHE.select(canTransfer, amount, TFHE.asEuint64(0));
 
-        _encBalances[to] = TFHE.add(_encBalances[to], canTransferAmount);
-        _encBalances[msg.sender] = TFHE.sub(_encBalances[msg.sender], canTransferAmount);
-        TFHE.allow(_encBalances[to], address(this));
-        TFHE.allow(_encBalances[to], to);
-        TFHE.allow(_encBalances[to], gateway);
+        _transfer(msg.sender, to, canTransferAmount, canTransfer);
+    }
 
-        TFHE.allow(_encBalances[msg.sender], address(this));
-        TFHE.allow(_encBalances[msg.sender], msg.sender);
-        TFHE.allow(_encBalances[msg.sender], gateway);
+    function transferFromEncrypted(address from, address to, einput encryptedAmount, bytes calldata inputProof) public {
+        euint64 amount = TFHE.asEuint64(encryptedAmount, inputProof);
+        require(TFHE.isSenderAllowed(amount));
+
+        ebool canTransfer = TFHE.le(amount, _encBalances[from]);
+        euint64 canTransferAmount = TFHE.select(canTransfer, amount, TFHE.asEuint64(0));
+
+        ebool isTransferable = _updateAllowance(from, msg.sender, canTransferAmount);
+
+        _transfer(from, to, canTransferAmount, isTransferable);
+    }
+
+    function _updateAllowance(address owner, address spender, euint64 amount) internal returns (ebool) {
+        euint64 currentAllowance = _allowances[owner][spender];
+        ebool allowedTransfer = TFHE.le(amount, currentAllowance);
+        ebool canTransfer = TFHE.le(amount, _encBalances[owner]);
+        ebool isTransferable = TFHE.and(canTransfer, allowedTransfer);
+        _allowances[owner][spender] = TFHE.select(isTransferable, TFHE.sub(currentAllowance, amount), currentAllowance);
+        TFHE.allow(_allowances[owner][spender], address(this));
+        TFHE.allow(_allowances[owner][spender], owner);
+        TFHE.allow(_allowances[owner][spender], spender);
+        return isTransferable;
+    }
+
+    function _transfer(address from, address to, euint64 amount, ebool isTransferable) internal {
+        euint64 transferValue = TFHE.select(isTransferable, amount, TFHE.asEuint64(0));
+        euint64 newBalanceTo = TFHE.add(_encBalances[to], transferValue);
+        _encBalances[to] = newBalanceTo;
+        TFHE.allow(newBalanceTo, address(this));
+        TFHE.allow(newBalanceTo, to);
+        TFHE.allow(newBalanceTo, gateway);
+        euint64 newBalanceFrom = TFHE.sub(_encBalances[from], transferValue);
+        _encBalances[from] = newBalanceFrom;
+        TFHE.allow(newBalanceFrom, address(this));
+        TFHE.allow(newBalanceFrom, from);
+        TFHE.allow(newBalanceFrom, gateway);
     }
 
     // Converts the amount for deposit.

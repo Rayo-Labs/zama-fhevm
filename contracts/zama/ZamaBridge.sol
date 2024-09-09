@@ -3,17 +3,22 @@ pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "fhevm/lib/TFHE.sol";
-import "../utils/ABIUtils.sol";
-import "../utils/oracle/IXOracle.sol";
+
+interface IZamaWEERC20 {
+    function transferFromEncrypted(
+        address sender,
+        address recipient,
+        einput encryptedAmount,
+        bytes calldata inputProof
+    ) external returns (bool);
+}
 
 contract ZamaBridge is Ownable2Step {
-    IXOracle public oracle;
-
+    IZamaWEERC20 public weerc20;
     mapping(address => bool) public relayers;
 
     event Packet(bytes packet, address relayerAddress);
 
-    error InvalidChainId();
     error OnlyRelayer();
 
     modifier onlyRelayer() {
@@ -23,74 +28,38 @@ contract ZamaBridge is Ownable2Step {
         _;
     }
 
-    constructor(address _oracle) Ownable(msg.sender) {
-        oracle = IXOracle(_oracle);
+    constructor(address _tokenAddress) Ownable(msg.sender) {
+        weerc20 = IZamaWEERC20(_tokenAddress);
     }
 
-    function setOracle(address _oracle) public onlyOwner {
-        oracle = IXOracle(_oracle);
+    function setRelayer(address _relayer, bool _status) public onlyOwner {
+        relayers[_relayer] = _status;
     }
 
-    function bridgeNativeToNative(
-        einput _encryptedInput,
-        einput _encryptedRelayerInput,
-        uint256 _slippage,
+    function bridgeWEERC20(
+        einput _encryptedTo,
+        einput _encryptedAmount,
+        bytes calldata _inputProof,
         address _relayerAddress
-    ) public payable {
+    ) public {
         // bridgeNativeToNative implementation
-        uint256 amountIn = msg.value;
-        uint256 amountOut = _calculateAmountOut(9000, 1, amountIn);
+        weerc20.transferFromEncrypted(msg.sender, address(this), _encryptedAmount, _inputProof);
 
-        bytes memory data = ABIUtils.encodePacketData(
-            _encryptedInput,
-            _encryptedRelayerInput,
-            amountIn,
-            amountOut,
-            _slippage
-        );
-        bytes memory packet = ABIUtils.encodePacket(BridgeType.NativeToNative, data);
+        bytes memory packet = _encodePacketData(_encryptedTo, _encryptedAmount, _inputProof, _relayerAddress);
 
         emit Packet(packet, _relayerAddress);
     }
 
-    /**
-     * @dev _encryptedInput have to be (address to,). This input is just readable by the destination chain contract.
-     */
-    function bridgeNativeToWEETH(
-        einput _encryptedInput,
-        einput _encryptedRelayerInput,
-        uint256 _slippage,
+    function _encodePacketData(
+        einput _encryptedTo,
+        einput _encryptedAmount,
+        bytes memory _inputProof,
         address _relayerAddress
-    ) public payable {
-        // bridgeNativeToWEETH implementation
-        uint256 amountIn = msg.value;
-        uint256 amountOut = _calculateAmountOut(9000, 1, amountIn);
-
-        bytes memory data = ABIUtils.encodePacketData(
-            _encryptedInput,
-            _encryptedRelayerInput,
-            amountIn,
-            amountOut,
-            _slippage
-        );
-        bytes memory packet = ABIUtils.encodePacket(BridgeType.NativeToWEETH, data);
-
-        emit Packet(packet, _relayerAddress);
+    ) internal pure returns (bytes memory) {
+        return abi.encode(_encryptedTo, _encryptedAmount, _inputProof, _relayerAddress);
     }
 
-    function _calculateAmountOut(
-        uint256 _sourceChainId,
-        uint256 _destinationChainId,
-        uint256 _amount
-    ) internal view returns (uint256) {
-        // _calculateAmountOut implementation
-        uint256 sourceChainPrice = oracle.getPrice(_sourceChainId);
-        uint256 destinationChainPrice = oracle.getPrice(_destinationChainId);
-
-        if (sourceChainPrice == 0 || destinationChainPrice == 0) {
-            revert InvalidChainId();
-        }
-
-        return (_amount * sourceChainPrice) / destinationChainPrice;
+    function _decodePacketData(bytes memory _data) internal pure returns (einput, einput, bytes memory, address) {
+        return abi.decode(_data, (einput, einput, bytes, address));
     }
 }

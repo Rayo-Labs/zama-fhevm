@@ -6,7 +6,7 @@ import { abi } from "./abi";
 
 const { ethers } = hre;
 
-const contractAddress = "0xe8a12B124580e653633Cf49c780903101458C183"; // 0x8d55cD2853081F80f9f8c6FEE4e949590240c005 // 0x02af3256c398131bDe388310b305c8Cf6E7f8844
+const contractAddress = "0xF63C595e18660CA4d1714B8f68414CF1cdbac2f2"; // 0x8d55cD2853081F80f9f8c6FEE4e949590240c005 // 0x02af3256c398131bDe388310b305c8Cf6E7f8844
 
 async function ContractCall(ca: string, cabi: any, cfunc: string, cargs: any[] = [], cvalue: string = "0") {
   const args = cargs;
@@ -37,6 +37,18 @@ async function ContractCall(ca: string, cabi: any, cfunc: string, cargs: any[] =
     // const permission = client.extractPermitPermission(permit!);
     // console.log(permission);
     // args[0] = permission;
+  } else if (cfunc === "approve") {
+    const input = instance.createEncryptedInput(ca, wallet.address);
+    input.add64(args[1]);
+    const encryptedInput = input.encrypt();
+    args[1] = encryptedInput.handles[0];
+    args[2] = encryptedInput.inputProof;
+  } else if (cfunc === "transferFromEncrypted") {
+    const input = instance.createEncryptedInput(ca, wallet.address);
+    input.add64(args[2]);
+    const encryptedInput = input.encrypt();
+    args[2] = encryptedInput.handles[0];
+    args[3] = encryptedInput.inputProof;
   }
   const contract = new ethers.Contract(ca, cabi, wallet);
   const result = await contract[cfunc](...args, {
@@ -49,6 +61,7 @@ async function main() {
   const param = process.argv[2];
   const param2 = process.argv[3];
   const param3 = process.argv[4];
+  const param4 = process.argv[5];
   switch (param) {
     case "getDecimals":
       await ContractCall(contractAddress, abi, "decimals");
@@ -77,6 +90,19 @@ async function main() {
       await ContractCall(contractAddress, abi, "transferEncrypted", [to, BigInt(Number(value) * 10 ** 6)]);
       break;
     }
+    case "transferFromEncrypted": {
+      const [from, to, value] = [param2, param3, param4];
+      await ContractCall(contractAddress, abi, "transferFromEncrypted", [from, to, BigInt(Number(value) * 10 ** 6)]);
+      break;
+    }
+    case "approve": {
+      const [spender, value] = [param2, param3];
+      await ContractCall(contractAddress, abi, "approve", [spender, BigInt(Number(value) * 10 ** 6)]);
+      break;
+    }
+    case "getAllowance":
+      await ContractCall(contractAddress, abi, "getAllowance", [param2, param3]);
+      break;
     case "getBalanceEncrypted":
       await ContractCall(contractAddress, abi, "getBalanceEncrypted");
       break;
