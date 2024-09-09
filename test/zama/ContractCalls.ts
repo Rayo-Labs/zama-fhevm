@@ -3,10 +3,11 @@ import { createInstance as createFhevmInstance } from "fhevmjs";
 import hre from "hardhat";
 
 import { abi } from "./abi";
+import { abi2 } from "./abi2";
 
 const { ethers } = hre;
 
-const contractAddress = "0xF63C595e18660CA4d1714B8f68414CF1cdbac2f2"; // 0x8d55cD2853081F80f9f8c6FEE4e949590240c005 // 0x02af3256c398131bDe388310b305c8Cf6E7f8844
+const contractAddress = "0x51e4D90a6E799ABcFe6E156a3385f6318800EB47"; // 0x8d55cD2853081F80f9f8c6FEE4e949590240c005 // 0x02af3256c398131bDe388310b305c8Cf6E7f8844
 
 async function ContractCall(ca: string, cabi: any, cfunc: string, cargs: any[] = [], cvalue: string = "0") {
   const args = cargs;
@@ -49,7 +50,23 @@ async function ContractCall(ca: string, cabi: any, cfunc: string, cargs: any[] =
     const encryptedInput = input.encrypt();
     args[2] = encryptedInput.handles[0];
     args[3] = encryptedInput.inputProof;
+  } else if (cfunc === "bridgeWEERC20") {
+    const input = instance.createEncryptedInput(ca, contractAddress);
+    input.addAddress(args[0]);
+    input.add64(args[1]);
+    const encryptedInput = input.encrypt();
+
+    args[0] = encryptedInput.handles[0];
+    args[1] = encryptedInput.handles[1];
+    args[2] = encryptedInput.inputProof;
+    args[3] = "0x8d55cD2853081F80f9f8c6FEE4e949590240c005";
   }
+  console.log("args 0: ", args[0]);
+  console.log("args 1: ", args[1]);
+  console.log("args 2: ", args[2]);
+  console.log("args 3: ", args[3]);
+  console.log("args", args);
+
   const contract = new ethers.Contract(ca, cabi, wallet);
   const result = await contract[cfunc](...args, {
     value: BigInt(Number(cvalue) * 10 ** 18),
@@ -106,6 +123,11 @@ async function main() {
     case "getBalanceEncrypted":
       await ContractCall(contractAddress, abi, "getBalanceEncrypted");
       break;
+    case "bridge": {
+      const [to, value] = [param2, param3];
+      await ContractCall(contractAddress, abi2, "bridgeWEERC20", [to, BigInt(Number(value) * 10 ** 6)]);
+      break;
+    }
     default:
       console.log("Invalid parameter");
       console.log("Your param: ", param);
