@@ -7,9 +7,9 @@ import { abi2 } from "./abi2";
 
 const { ethers } = hre;
 
-const contractAddress = "0x9b1137FD757C5B3A7779cfC1Da9493bC6d9E4549"; // 0x8d55cD2853081F80f9f8c6FEE4e949590240c005 // 0x02af3256c398131bDe388310b305c8Cf6E7f8844
+const contractAddress = "0x44c7248F14ed2A613ac6Db6137A8DcD288898147"; // 0x8d55cD2853081F80f9f8c6FEE4e949590240c005 // 0x02af3256c398131bDe388310b305c8Cf6E7f8844
 // Token : 0x347ca7028Bc962927D5f87F3FF2FdAcC2A704e00
-// Bridge : 0x9eACD763Dfb2Ee22EF7A95664f91ADC839C1EC23
+// Bridge : 0x44c7248F14ed2A613ac6Db6137A8DcD288898147
 // Address 1 : 0x9C3Ad2B5f00EC8e8564244EBa59692Dd5e57695b
 // Address 2 : 0xCe2C4e2296F736962901a5aD0138138817ABcA8f
 // Address 3 : 0xA139Bcfb689926ebCF2AABDbd32FBaFC250e70d9
@@ -56,15 +56,19 @@ async function ContractCall(ca: string, cabi: any, cfunc: string, cargs: any[] =
     args[2] = encryptedInput.handles[0];
     args[3] = encryptedInput.inputProof;
   } else if (cfunc === "bridgeWEERC20") {
-    const input = instance.createEncryptedInput(ca, wallet.address);
-    input.addAddress(args[0]);
+    const input = instance.createEncryptedInput(args[2], contractAddress);
     input.add64(args[1]);
     const encryptedInput = input.encrypt();
-    args[0] = encryptedInput.handles[0];
-    args[1] = encryptedInput.handles[1];
+    const input2 = instance.createEncryptedInput(ca, wallet.address);
+    input2.addAddress(args[0]);
+    const encryptedInput2 = input2.encrypt();
+    args[0] = encryptedInput2.handles[0];
+    args[1] = encryptedInput.handles[0];
     args[2] = encryptedInput.inputProof;
     args[3] = "0x8d55cD2853081F80f9f8c6FEE4e949590240c005";
   }
+
+  console.log("args: ", args);
 
   const contract = new ethers.Contract(ca, cabi, wallet);
   const result = await contract[cfunc](...args, {
@@ -124,8 +128,8 @@ async function main() {
       await ContractCall(contractAddress, abi, "getBalanceEncrypted");
       break;
     case "bridge": {
-      const [to, value] = [param2, param3];
-      await ContractCall(contractAddress, abi2, "bridgeWEERC20", [to, BigInt(Number(value) * 10 ** 6)]);
+      const [to, value, ica] = [param2, param3, param4];
+      await ContractCall(contractAddress, abi2, "bridgeWEERC20", [to, BigInt(Number(value) * 10 ** 6), ica]);
       break;
     }
     default:
