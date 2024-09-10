@@ -84,7 +84,7 @@ contract ZamaWEERC20 is ERC20, GatewayCaller {
         ebool canTransfer = TFHE.le(amount, _encBalances[msg.sender]);
         euint64 canTransferAmount = TFHE.select(canTransfer, amount, TFHE.asEuint64(0));
 
-        _transfer(msg.sender, to, canTransferAmount, canTransfer);
+        _transferEncrypted(msg.sender, to, canTransferAmount, canTransfer);
     }
 
     function transferFromEncrypted(address from, address to, einput encryptedAmount, bytes calldata inputProof) public {
@@ -96,7 +96,7 @@ contract ZamaWEERC20 is ERC20, GatewayCaller {
 
         ebool isTransferable = _updateAllowance(from, msg.sender, canTransferAmount);
 
-        _transfer(from, to, canTransferAmount, isTransferable);
+        _transferEncrypted(from, to, canTransferAmount, isTransferable);
     }
 
     function _updateAllowance(address owner, address spender, euint64 amount) internal returns (ebool) {
@@ -111,7 +111,7 @@ contract ZamaWEERC20 is ERC20, GatewayCaller {
         return isTransferable;
     }
 
-    function _transfer(address from, address to, euint64 amount, ebool isTransferable) internal {
+    function _transferEncrypted(address from, address to, euint64 amount, ebool isTransferable) internal {
         euint64 transferValue = TFHE.select(isTransferable, amount, TFHE.asEuint64(0));
         euint64 newBalanceTo = TFHE.add(_encBalances[to], transferValue);
         _encBalances[to] = newBalanceTo;
