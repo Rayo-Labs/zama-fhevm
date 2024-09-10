@@ -7,7 +7,12 @@ import { abi2 } from "./abi2";
 
 const { ethers } = hre;
 
-const contractAddress = "0x51e4D90a6E799ABcFe6E156a3385f6318800EB47"; // 0x8d55cD2853081F80f9f8c6FEE4e949590240c005 // 0x02af3256c398131bDe388310b305c8Cf6E7f8844
+const contractAddress = "0x9b1137FD757C5B3A7779cfC1Da9493bC6d9E4549"; // 0x8d55cD2853081F80f9f8c6FEE4e949590240c005 // 0x02af3256c398131bDe388310b305c8Cf6E7f8844
+// Token : 0x347ca7028Bc962927D5f87F3FF2FdAcC2A704e00
+// Bridge : 0x9eACD763Dfb2Ee22EF7A95664f91ADC839C1EC23
+// Address 1 : 0x9C3Ad2B5f00EC8e8564244EBa59692Dd5e57695b
+// Address 2 : 0xCe2C4e2296F736962901a5aD0138138817ABcA8f
+// Address 3 : 0xA139Bcfb689926ebCF2AABDbd32FBaFC250e70d9
 
 async function ContractCall(ca: string, cabi: any, cfunc: string, cargs: any[] = [], cvalue: string = "0") {
   const args = cargs;
@@ -51,25 +56,20 @@ async function ContractCall(ca: string, cabi: any, cfunc: string, cargs: any[] =
     args[2] = encryptedInput.handles[0];
     args[3] = encryptedInput.inputProof;
   } else if (cfunc === "bridgeWEERC20") {
-    const input = instance.createEncryptedInput(ca, contractAddress);
+    const input = instance.createEncryptedInput(ca, wallet.address);
     input.addAddress(args[0]);
     input.add64(args[1]);
     const encryptedInput = input.encrypt();
-
     args[0] = encryptedInput.handles[0];
     args[1] = encryptedInput.handles[1];
     args[2] = encryptedInput.inputProof;
     args[3] = "0x8d55cD2853081F80f9f8c6FEE4e949590240c005";
   }
-  console.log("args 0: ", args[0]);
-  console.log("args 1: ", args[1]);
-  console.log("args 2: ", args[2]);
-  console.log("args 3: ", args[3]);
-  console.log("args", args);
 
   const contract = new ethers.Contract(ca, cabi, wallet);
   const result = await contract[cfunc](...args, {
     value: BigInt(Number(cvalue) * 10 ** 18),
+    gasLimit: 6000000,
   });
   console.log("result: ", result);
 }

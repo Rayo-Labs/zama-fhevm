@@ -5,6 +5,8 @@ import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "fhevm/lib/TFHE.sol";
 
 interface IZamaWEERC20 {
+    function transferFrom(address recipient, einput encryptedAmount, bytes calldata inputProof) external returns (bool);
+
     function transferFromEncrypted(
         address sender,
         address recipient,
@@ -43,7 +45,7 @@ contract ZamaBridge is Ownable2Step {
         address _relayerAddress
     ) public {
         // bridgeNativeToNative implementation
-        weerc20.transferFromEncrypted(msg.sender, address(this), _encryptedAmount, _inputProof);
+        weerc20.transferFrom(address(this), _encryptedAmount, _inputProof);
 
         bytes memory packet = _encodePacketData(_encryptedTo, _encryptedAmount, _inputProof, _relayerAddress);
 
