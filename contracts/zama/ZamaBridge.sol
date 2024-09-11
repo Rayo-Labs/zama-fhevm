@@ -25,6 +25,8 @@ contract ZamaBridge is Ownable2Step {
 
     event Packet(bytes packet, address relayerAddress);
 
+    event IntentProcessed(address indexed to, uint256 encryptedAmount);
+
     error OnlyRelayer();
 
     modifier onlyRelayer() {
@@ -49,23 +51,16 @@ contract ZamaBridge is Ownable2Step {
         address _relayerAddress
     ) public {
         // bridgeNativeToNative implementation
-        weerc20.transferFromEncrypted(msg.sender, address(this), _encryptedAmount, _inputProof);
-
-        bytes memory packet = _encodePacketData(_encryptedTo, _encryptedAmount, _inputProof, _relayerAddress);
-
-        emit Packet(packet, _relayerAddress);
+        // weerc20.transferFromEncrypted(msg.sender, address(this), _encryptedAmount, _inputProof);
+        // bytes memory packet = _encodePacketData(_encryptedTo, _encryptedAmount, _inputProof, _relayerAddress);
+        // emit Packet(packet, _relayerAddress);
     }
 
-    function _encodePacketData(
-        einput _encryptedTo,
+    function onRecvIntent(
+        address _to,
         einput _encryptedAmount,
-        bytes memory _inputProof,
-        address _relayerAddress
-    ) internal pure returns (bytes memory) {
-        return abi.encode(_encryptedTo, _encryptedAmount, _inputProof, _relayerAddress);
-    }
-
-    function _decodePacketData(bytes memory _data) internal pure returns (einput, einput, bytes memory, address) {
-        return abi.decode(_data, (einput, einput, bytes, address));
+        bytes calldata inputProof // onlyRelayer
+    ) external {
+        weerc20.transferEncrypted(_to, _encryptedAmount, inputProof);
     }
 }

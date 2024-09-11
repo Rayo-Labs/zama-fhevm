@@ -55,6 +55,14 @@ async function ContractCall(ca: string, cabi: any, cfunc: string, cargs: any[] =
     const encryptedInput = input.encrypt();
     args[2] = encryptedInput.handles[0];
     args[3] = encryptedInput.inputProof;
+  } else if (cfunc === "onRecvIntent") {
+    const input = instance.createEncryptedInput(ca, wallet.address);
+
+    input.add64(args[1]);
+    const encryptedInput = input.encrypt();
+
+    args[0] = encryptedInput.handles[0];
+    args[1] = encryptedInput.inputProof;
   } else if (cfunc === "bridgeWEERC20") {
     const input = instance.createEncryptedInput(ca, wallet.address);
     input.addAddress(args[0]);
@@ -108,6 +116,11 @@ async function main() {
     case "transferEncrypted": {
       const [to, value] = [param2, param3];
       await ContractCall(contractAddress, abi, "transferEncrypted", [to, BigInt(Number(value) * 10 ** 6)]);
+      break;
+    }
+    case "onRecvIntent": {
+      const [to, value] = [param2, param3];
+      await ContractCall(contractAddress, abi, "onRecvIntent", [to, BigInt(Number(value) * 10 ** 6)]);
       break;
     }
     case "transferFromEncrypted": {
