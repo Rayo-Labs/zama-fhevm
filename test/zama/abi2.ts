@@ -12,6 +12,11 @@ export const abi2 = [
   },
   {
     inputs: [],
+    name: "DecryptionFailed",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "OnlyRelayer",
     type: "error",
   },
@@ -36,6 +41,37 @@ export const abi2 = [
     ],
     name: "OwnableUnauthorizedAccount",
     type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "from",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "tokenAddress",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "einput",
+        name: "encryptedAmount",
+        type: "bytes32",
+      },
+    ],
+    name: "IntentProcessed",
+    type: "event",
   },
   {
     anonymous: false,
@@ -125,6 +161,61 @@ export const abi2 = [
       },
     ],
     name: "bridgeWEERC20",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes",
+        name: "decryptedIntent",
+        type: "bytes",
+      },
+    ],
+    name: "callbackRecvIntent",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "gateway",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "einput",
+        name: "encryptedIntent",
+        type: "bytes32",
+      },
+      {
+        internalType: "bytes",
+        name: "inputProof",
+        type: "bytes",
+      },
+    ],
+    name: "onRecvIntent",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

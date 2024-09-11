@@ -7,9 +7,9 @@ import { abi2 } from "./abi2";
 
 const { ethers } = hre;
 
-const contractAddress = "0xC6f7c12AdF953D04BFc1ba706954aC1b1546Eb42"; // 0x8d55cD2853081F80f9f8c6FEE4e949590240c005 // 0x02af3256c398131bDe388310b305c8Cf6E7f8844
-// Token : 0xdD8e66345d3Edd854682f718F960845Fa7A3da71
-// Bridge : 0xC6f7c12AdF953D04BFc1ba706954aC1b1546Eb42
+const contractAddress = "0x57606B84255c6c7B5889554D840d5e22b7AB2f93"; // 0x8d55cD2853081F80f9f8c6FEE4e949590240c005 // 0x02af3256c398131bDe388310b305c8Cf6E7f8844
+// Token : 0x57606B84255c6c7B5889554D840d5e22b7AB2f93
+// Bridge : 0x0C76E82a6E8EFB346f9772BEdE410521Ab9dC6D5
 // Address 1 : 0x9C3Ad2B5f00EC8e8564244EBa59692Dd5e57695b
 // Address 2 : 0xCe2C4e2296F736962901a5aD0138138817ABcA8f
 // Address 3 : 0xA139Bcfb689926ebCF2AABDbd32FBaFC250e70d9
@@ -55,6 +55,18 @@ async function ContractCall(ca: string, cabi: any, cfunc: string, cargs: any[] =
     const encryptedInput = input.encrypt();
     args[2] = encryptedInput.handles[0];
     args[3] = encryptedInput.inputProof;
+  } else if (cfunc === "onRecvIntent") {
+    const input = instance.createEncryptedInput(ca, wallet.address);
+
+    input.addAddress(args[0]);
+    input.addAddress(args[1]);
+    input.addAddress(args[2]);
+    input.add64(args[3]);
+
+    const encryptedInput = input.encrypt();
+
+    args[0] = encryptedInput.handles[0];
+    args[1] = encryptedInput.inputProof;
   } else if (cfunc === "bridgeWEERC20") {
     const input = instance.createEncryptedInput(ca, wallet.address);
     input.addAddress(args[0]);
@@ -82,6 +94,7 @@ async function main() {
   const param2 = process.argv[3];
   const param3 = process.argv[4];
   const param4 = process.argv[5];
+  const param5 = process.argv[6];
   switch (param) {
     case "getDecimals":
       await ContractCall(contractAddress, abi, "decimals");
@@ -110,8 +123,8 @@ async function main() {
       await ContractCall(contractAddress, abi, "transferEncrypted", [to, BigInt(Number(value) * 10 ** 6)]);
       break;
     }
-    case "transferFromEncrypted": {
-      const [from, to, value] = [param2, param3, param4];
+    case "onRecvIntent": {
+      const [from, to, tokenaddress, value] = [param2, param3, param4, param5];
       await ContractCall(contractAddress, abi, "transferFromEncrypted", [from, to, BigInt(Number(value) * 10 ** 6)]);
       break;
     }
