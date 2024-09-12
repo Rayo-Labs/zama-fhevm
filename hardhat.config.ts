@@ -127,7 +127,7 @@ task("test", async (taskArgs, hre, runSuper) => {
 });
 
 const config: HardhatUserConfig = {
-  defaultNetwork: "local",
+  defaultNetwork: "zama",
   namedAccounts: {
     deployer: 0,
   },

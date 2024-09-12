@@ -99,6 +99,17 @@ contract ZamaWEERC20 is ERC20, GatewayCaller {
         _transferEncrypted(from, to, canTransferAmount, isTransferable);
     }
 
+    function transferFromEncrypted(address from, address to, euint64 encryptedAmount) public {
+        // require(TFHE.isSenderAllowed(encryptedAmount));
+
+        ebool canTransfer = TFHE.le(encryptedAmount, _encBalances[from]);
+        euint64 canTransferAmount = TFHE.select(canTransfer, encryptedAmount, TFHE.asEuint64(0));
+
+        ebool isTransferable = _updateAllowance(from, msg.sender, canTransferAmount);
+
+        _transferEncrypted(from, to, canTransferAmount, isTransferable);
+    }
+
     function _updateAllowance(address owner, address spender, euint64 amount) internal returns (ebool) {
         euint64 currentAllowance = _allowances[owner][spender];
         ebool allowedTransfer = TFHE.le(amount, currentAllowance);

@@ -4,10 +4,11 @@ import hre from "hardhat";
 
 import { abi } from "./abi";
 import { abi2 } from "./abi2";
+import { testabi } from './abitest'
 
 const { ethers } = hre;
 
-const contractAddress = "0x57606B84255c6c7B5889554D840d5e22b7AB2f93"; // 0x8d55cD2853081F80f9f8c6FEE4e949590240c005 // 0x02af3256c398131bDe388310b305c8Cf6E7f8844
+const contractAddress = "0x74431f4162EB7F8137491DA5ad0449626de58E94"; // 0x8d55cD2853081F80f9f8c6FEE4e949590240c005 // 0x02af3256c398131bDe388310b305c8Cf6E7f8844
 // Token : 0x57606B84255c6c7B5889554D840d5e22b7AB2f93
 // Bridge : 0x0C76E82a6E8EFB346f9772BEdE410521Ab9dC6D5
 // Address 1 : 0x9C3Ad2B5f00EC8e8564244EBa59692Dd5e57695b
@@ -18,16 +19,17 @@ async function ContractCall(ca: string, cabi: any, cfunc: string, cargs: any[] =
   const args = cargs;
   const privateKey = process.env.PRIVATE_KEY_DEPLOYER as string;
   const wallet = new ethers.Wallet(privateKey, new ethers.JsonRpcProvider("https://devnet.zama.ai"));
+  console.log('running script with wallet address: ', wallet.address);
   const instance = await createFhevmInstance({
     networkUrl: "https://devnet.zama.ai",
     gatewayUrl: "https://gateway.devnet.zama.ai",
   });
   //const client = new FhenixClient({ provider: hre.ethers.provider });
 
-  if (cfunc === "unwrap") {
+  if (cfunc === "unwrap" || cfunc === "createTest") {
     // const encryptedUint64 = await client.encrypt_uint64(args[0]);
     const input = instance.createEncryptedInput(ca, wallet.address);
-    input.add64(args[0]);
+    input.add64(Number(args[0]));
     const encryptedInput = input.encrypt();
     args[0] = encryptedInput.handles[0];
     args[1] = encryptedInput.inputProof;
@@ -144,7 +146,11 @@ async function main() {
       await ContractCall(contractAddress, abi2, "bridgeWEERC20", [to, BigInt(Number(value) * 10 ** 6)]);
       break;
     }
+    case "nextIntentId":
+      await ContractCall(contractAddress, abi2, "nextIntentId");
+      break;
     default:
+      await ContractCall(contractAddress, testabi, param);
       console.log("Invalid parameter");
       console.log("Your param: ", param);
   }
