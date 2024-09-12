@@ -5,25 +5,22 @@ import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "fhevm/lib/TFHE.sol";
 
 interface IZamaWEERC20 {
-    function transferEncrypted(
-        address recipient,
-        einput encryptedAmount,
-        bytes calldata inputProof
-    ) external returns (bool);
+    function transferEncrypted(address recipient, einput encryptedAmount, bytes calldata inputProof) external;
 
     function transferFromEncrypted(
         address sender,
         address recipient,
         einput encryptedAmount,
         bytes calldata inputProof
-    ) external returns (bool);
+    ) external;
 }
 
 contract ZamaBridge is Ownable2Step {
     IZamaWEERC20 public weerc20;
     mapping(address => bool) public relayers;
 
-    event Packet(bytes packet, address relayerAddress);
+    event Packet(eaddress to, euint64 amount, address relayer);
+    event TestPacket(uint256 num);
 
     event IntentProcessed(address indexed to, uint256 encryptedAmount);
 
@@ -50,10 +47,19 @@ contract ZamaBridge is Ownable2Step {
         bytes calldata _inputProof,
         address _relayerAddress
     ) public {
-        // bridgeNativeToNative implementation
-        // weerc20.transferFromEncrypted(msg.sender, address(this), _encryptedAmount, _inputProof);
-        // bytes memory packet = _encodePacketData(_encryptedTo, _encryptedAmount, _inputProof, _relayerAddress);
-        // emit Packet(packet, _relayerAddress);
+        weerc20.transferFromEncrypted(msg.sender, address(this), _encryptedAmount, _inputProof);
+
+        eaddress to = TFHE.asEaddress(_encryptedTo, _inputProof);
+        euint64 amount = TFHE.asEuint64(_encryptedAmount, _inputProof);
+
+        TFHE.allow(to, _relayerAddress);
+        TFHE.allow(amount, _relayerAddress);
+
+        emit Packet(to, amount, _relayerAddress);
+    }
+
+    function testEmit() public {
+        emit TestPacket(123);
     }
 
     function onRecvIntent(
@@ -62,5 +68,9 @@ contract ZamaBridge is Ownable2Step {
         bytes calldata inputProof // onlyRelayer
     ) external {
         weerc20.transferEncrypted(_to, _encryptedAmount, inputProof);
+    }
+
+    function withdraw(einput _encryptedAmount, bytes calldata _inputProof) public onlyOwner {
+        weerc20.transferEncrypted(msg.sender, _encryptedAmount, _inputProof);
     }
 }

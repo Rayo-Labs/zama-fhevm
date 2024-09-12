@@ -66,7 +66,11 @@ contract ZamaWEERC20 is ERC20, GatewayCaller {
         return true;
     }
 
-    function approve(address spender, einput encryptedAmount, bytes calldata inputProof) public returns (bool) {
+    function approveEncrypted(
+        address spender,
+        einput encryptedAmount,
+        bytes calldata inputProof
+    ) public returns (bool) {
         euint64 amount = TFHE.asEuint64(encryptedAmount, inputProof);
 
         _allowances[msg.sender][spender] = amount;
