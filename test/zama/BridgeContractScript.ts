@@ -6,7 +6,7 @@ import { abi } from "../../artifacts/contracts/zama/ZamaBridge.sol/ZamaBridge.js
 
 const { ethers } = hre;
 
-const contractAddress = "0x44209DC2B66C1e6d1363Fb753798E58724C1da40";
+const contractAddress = "0x1da69d91f6b0Ae66B7CAcf2457037FA5d6aE7364";
 
 const wallets: { [key: string]: string } = {
   1: process.env.KEY as string,

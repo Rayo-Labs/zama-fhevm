@@ -77,6 +77,7 @@ contract ZamaWEERC20 is ERC20, GatewayCaller {
         TFHE.allow(_allowances[msg.sender][spender], address(this));
         TFHE.allow(_allowances[msg.sender][spender], msg.sender);
         TFHE.allow(_allowances[msg.sender][spender], spender);
+        TFHE.allow(_allowances[msg.sender][spender], gateway);
 
         return true;
     }
@@ -123,6 +124,7 @@ contract ZamaWEERC20 is ERC20, GatewayCaller {
         TFHE.allow(_allowances[owner][spender], address(this));
         TFHE.allow(_allowances[owner][spender], owner);
         TFHE.allow(_allowances[owner][spender], spender);
+        TFHE.allow(_allowances[owner][spender], gateway);
         return isTransferable;
     }
 

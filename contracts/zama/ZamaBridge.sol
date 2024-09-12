@@ -64,12 +64,6 @@ contract ZamaBridge is Ownable2Step, GatewayCaller {
 
         nextIntentId++;
 
-        TFHE.allow(eto, gateway);
-        TFHE.allow(eamount, gateway);
-        TFHE.allow(eamount, address(this));
-        TFHE.allow(eamount, address(weerc20));
-        TFHE.allow(encryptedIntentId, gateway);
-
         Intent memory intent = Intent({ from: msg.sender, to: eto, encryptedAmount: eamount });
         intents[nextIntentId] = intent;
 
@@ -84,8 +78,8 @@ contract ZamaBridge is Ownable2Step, GatewayCaller {
         address from = intent.from;
         euint64 amount = intent.encryptedAmount;
 
-        TFHE.allow(amount, gateway);
         TFHE.allow(amount, address(this));
+        TFHE.allow(amount, gateway);
         TFHE.allow(amount, address(weerc20));
 
         weerc20.transferFromEncrypted(from, to, amount);
@@ -97,5 +91,9 @@ contract ZamaBridge is Ownable2Step, GatewayCaller {
 
     function testEmit() public {
         emit TestPacket(123);
+    }
+
+    function withdraw(einput _encryptedAmount, bytes calldata _inputProof) public onlyOwner {
+        weerc20.transferEncrypted(msg.sender, _encryptedAmount, _inputProof);
     }
 }
