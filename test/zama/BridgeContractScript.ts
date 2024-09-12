@@ -6,12 +6,7 @@ import { abi } from "../../artifacts/contracts/zama/ZamaBridge.sol/ZamaBridge.js
 
 const { ethers } = hre;
 
-const contractAddress = "0x2Cf490D783B4E1c86262F0164869b4829b0e62F9";
-// Token : 0xBcfed921a10d0b3b3B1B0ec33a307f955D66019B
-// Bridge : 0xc2C53fD9106D4C1EB65AeB5da923aBc341247c7D
-// Address 1 : 0x9C3Ad2B5f00EC8e8564244EBa59692Dd5e57695b
-// Address 2 : 0xCe2C4e2296F736962901a5aD0138138817ABcA8f
-// Address 3 : 0xA139Bcfb689926ebCF2AABDbd32FBaFC250e70d9
+const contractAddress = "0x44209DC2B66C1e6d1363Fb753798E58724C1da40";
 
 const wallets: { [key: string]: string } = {
   1: process.env.KEY as string,
@@ -36,6 +31,14 @@ async function ContractCall(key: number, cfunc: string, cargs: any[] = [], cvalu
     args[1] = encryptedInput.handles[1];
     args[2] = encryptedInput.inputProof;
     args[3] = "0x9C3Ad2B5f00EC8e8564244EBa59692Dd5e57695b";
+  } else if (cfunc === "onRecvIntent") {
+    const input = instance.createEncryptedInput(contractAddress, wallet.address);
+    input.addAddress(args[0]);
+    input.add64(args[1]);
+    const encryptedInput = input.encrypt();
+    args[0] = encryptedInput.handles[0];
+    args[1] = encryptedInput.handles[1];
+    args[2] = encryptedInput.inputProof;
   }
 
   const contract = new ethers.Contract(contractAddress, abi, wallet);
@@ -53,7 +56,16 @@ async function main() {
   const param3 = process.argv[5];
 
   switch (param1) {
+    case "nextIntentId":
+      await ContractCall(Number(wallet), param1);
+      break;
+    case "intents":
+      await ContractCall(Number(wallet), param1, [BigInt(Number(param2))]);
+      break;
     case "bridgeWEERC20":
+      await ContractCall(Number(wallet), param1, [param2, BigInt(Number(param3) * 10 ** 6)]);
+      break;
+    case "onRecvIntent":
       await ContractCall(Number(wallet), param1, [param2, BigInt(Number(param3) * 10 ** 6)]);
       break;
     case "testEmit":

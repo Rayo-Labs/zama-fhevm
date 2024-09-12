@@ -6,9 +6,9 @@ import { abi } from "../../artifacts/contracts/zama/ZamaWEERC20.sol/ZamaWEERC20.
 
 const { ethers } = hre;
 
-const contractAddress = "0xBcfed921a10d0b3b3B1B0ec33a307f955D66019B";
-// Token : 0xBcfed921a10d0b3b3B1B0ec33a307f955D66019B
-// Bridge : 0xC6f7c12AdF953D04BFc1ba706954aC1b1546Eb42
+const contractAddress = "0x078377Bf62ae673feABdd4518FCEc6140453DF75";
+// Token : 0x078377Bf62ae673feABdd4518FCEc6140453DF75
+// Bridge : 0xC06b65E73c747d0835820113Ba616457D2Ec8888
 // Address 1 : 0x9C3Ad2B5f00EC8e8564244EBa59692Dd5e57695b
 // Address 2 : 0xCe2C4e2296F736962901a5aD0138138817ABcA8f
 // Address 3 : 0xA139Bcfb689926ebCF2AABDbd32FBaFC250e70d9
@@ -37,7 +37,7 @@ async function ContractCall(key: number, cfunc: string, cargs: any[] = [], cvalu
     const encryptedInput = input.encrypt();
     args[0] = encryptedInput.handles[0];
     args[1] = encryptedInput.inputProof;
-  } else if (cfunc === "approve") {
+  } else if (cfunc === "approveEncrypted") {
     const input = instance.createEncryptedInput(contractAddress, wallet.address);
     input.add64(args[1]);
     const encryptedInput = input.encrypt();
@@ -92,16 +92,16 @@ async function main() {
       await ContractCall(Number(wallet), param1, [BigInt(Number(param2) * 10 ** 6)]);
       break;
     }
+    case "approveEncrypted": {
+      await ContractCall(Number(wallet), param1, [param2, BigInt(Number(param3) * 10 ** 6)]);
+      break;
+    }
     case "transferEncrypted": {
       await ContractCall(Number(wallet), param1, [param2, BigInt(Number(param3) * 10 ** 6)]);
       break;
     }
     case "transferFromEncrypted": {
       await ContractCall(Number(wallet), param1, [param2, param3, BigInt(Number(param4) * 10 ** 6)]);
-      break;
-    }
-    case "approveEncrypted": {
-      await ContractCall(Number(wallet), param1, [param2, BigInt(Number(param3) * 10 ** 6)]);
       break;
     }
     default:
