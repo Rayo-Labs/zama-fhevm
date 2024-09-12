@@ -5,8 +5,8 @@ async function main() {
 
   console.log("Deploying contracts with the account:", deployer.address);
 
-  const FhenixWEERC20 = await hre.ethers.getContractFactory("FhenixWEERC20");
-  const fhenixWEERC20 = await FhenixWEERC20.deploy("Fhenix Encrypted ERC20", "FEERC20");
+  const FhenixWEERC20 = await hre.ethers.getContractFactory("ZamaTest");
+  const fhenixWEERC20 = await FhenixWEERC20.deploy();
 
   console.log("Contract deployed at:", fhenixWEERC20.target);
 }
