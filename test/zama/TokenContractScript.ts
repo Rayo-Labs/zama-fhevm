@@ -6,9 +6,9 @@ import { abi } from "../../artifacts/contracts/zama/ZamaWEERC20.sol/ZamaWEERC20.
 
 const { ethers } = hre;
 
-const contractAddress = "0x17e6e108c2DCBb98Ed2957a7B753d8373F661e56";
-// Token : 0x078377Bf62ae673feABdd4518FCEc6140453DF75
-// Bridge : 0x1da69d91f6b0Ae66B7CAcf2457037FA5d6aE7364
+const contractAddress = "0x6671ABC4ce4bE0416AeF2c41fFc95f5EeA837772";
+// Token : 0x6671ABC4ce4bE0416AeF2c41fFc95f5EeA837772
+// Bridge : 0x3c8Bb15EAf96F82d1f96b872b9D63f4058cF7613
 // Address 1 : 0x9C3Ad2B5f00EC8e8564244EBa59692Dd5e57695b
 // Address 2 : 0xCe2C4e2296F736962901a5aD0138138817ABcA8f
 // Address 3 : 0xA139Bcfb689926ebCF2AABDbd32FBaFC250e70d9
@@ -94,6 +94,14 @@ async function main() {
     }
     case "approveEncrypted": {
       await ContractCall(Number(wallet), param1, [param2, BigInt(Number(param3) * 10 ** 6)]);
+      break;
+    }
+    case "allowBalance": {
+      await ContractCall(Number(wallet), param1, [param2]);
+      break;
+    }
+    case "allowAllowance": {
+      await ContractCall(Number(wallet), param1, [param2, param3]);
       break;
     }
     case "transferEncrypted": {

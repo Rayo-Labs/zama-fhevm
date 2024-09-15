@@ -6,7 +6,7 @@ async function main() {
   console.log("Deploying contracts with the account:", deployer.address);
 
   const ZamaBridge = await hre.ethers.getContractFactory("ZamaBridge");
-  const zamaBridge = await ZamaBridge.deploy("0x17e6e108c2DCBb98Ed2957a7B753d8373F661e56");
+  const zamaBridge = await ZamaBridge.deploy("0x6671ABC4ce4bE0416AeF2c41fFc95f5EeA837772");
 
   console.log("Contract deployed at:", zamaBridge.target);
 }

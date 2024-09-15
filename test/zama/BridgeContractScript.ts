@@ -6,7 +6,7 @@ import { abi } from "../../artifacts/contracts/zama/ZamaBridge.sol/ZamaBridge.js
 
 const { ethers } = hre;
 
-const contractAddress = "0x1da69d91f6b0Ae66B7CAcf2457037FA5d6aE7364";
+const contractAddress = "0x3c8Bb15EAf96F82d1f96b872b9D63f4058cF7613";
 
 const wallets: { [key: string]: string } = {
   1: process.env.KEY as string,
@@ -33,11 +33,9 @@ async function ContractCall(key: number, cfunc: string, cargs: any[] = [], cvalu
     args[3] = "0x9C3Ad2B5f00EC8e8564244EBa59692Dd5e57695b";
   } else if (cfunc === "onRecvIntent") {
     const input = instance.createEncryptedInput(contractAddress, wallet.address);
-    input.addAddress(args[0]);
     input.add64(args[1]);
     const encryptedInput = input.encrypt();
-    args[0] = encryptedInput.handles[0];
-    args[1] = encryptedInput.handles[1];
+    args[1] = encryptedInput.handles[0];
     args[2] = encryptedInput.inputProof;
   }
 

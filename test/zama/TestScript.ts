@@ -30,8 +30,8 @@ async function command(cmd: string) {
 
 async function main() {
   const commands = [
-    `TS_NODE_TRANSPILE_ONLY=true ts-node ./test/zama/TokenContractScript.ts 1 wrap 20`,
-    `TS_NODE_TRANSPILE_ONLY=true ts-node ./test/zama/TokenContractScript.ts 1 transferEncrypted ${walletsPublicKey[3]} 10`,
+    `TS_NODE_TRANSPILE_ONLY=true ts-node ./test/zama/TokenContractScript.ts 1 wrap 40`,
+    `TS_NODE_TRANSPILE_ONLY=true ts-node ./test/zama/TokenContractScript.ts 1 transferEncrypted ${walletsPublicKey[3]} 20`,
     `TS_NODE_TRANSPILE_ONLY=true ts-node ./test/zama/TokenContractScript.ts 1 balanceOf ${walletsPublicKey[3]}`,
     `TS_NODE_TRANSPILE_ONLY=true ts-node ./test/zama/BridgeContractScript.ts 1 nextIntentId`,
     `TS_NODE_TRANSPILE_ONLY=true ts-node ./test/zama/BridgeContractScript.ts 3 onRecvIntent ${walletsPublicKey[3]} 10`,
