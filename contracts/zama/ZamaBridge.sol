@@ -56,7 +56,7 @@ contract ZamaBridge is Ownable2Step, GatewayCaller {
     }
 
     function onRecvIntent(address _to, einput _encryptedAmount, bytes calldata inputProof) external {
-        weerc20.transferFromEncrypted(msg.sender, address(this), _encryptedAmount, inputProof);
+        weerc20.transferFromEncrypted(msg.sender, _to, _encryptedAmount, inputProof);
 
         euint64 eamount = TFHE.asEuint64(_encryptedAmount, inputProof);
 
